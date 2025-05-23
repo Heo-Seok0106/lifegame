@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width" />
+  <style>
+    body {
+      background-color: #f5f5f5;
+      font-family: 'Segoe UI', sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+      color: #333;
+    }
+
+    #controls {
+      margin-bottom: 15px;
+    }
+
+    button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 8px 15px;
+      margin: 5px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    #grid {
+      display: grid;
+      grid-template-columns: repeat(20, 20px);
+      gap: 1px;
+      justify-content: center;
+      margin-top: 10px;
+    }
+
+    .cell {
+      width: 20px;
+      height: 20px;
+      background-color: #e0e0e0;
+      border-radius: 2px;
+      transition: background-color 0.2s ease;
+    }
+
+    .cell.alive {
+      background-color: #555;
+    }
+  </style>
+</head>
+<body>
+  <h1>라이프 게임</h1>
+  <div id="controls">
+    <button onclick="clearWorld()">Clear</button>
+    <button onclick="clearInterval(myInterval)">Stop</button>
+    <button onclick="NextGeneration()">Next</button>
+    <button onclick="myInterval = setInterval(NextGeneration, 300)">Start</button>
+  </div>
+  <div id="grid"></div>
+
+  <script>
+    const size = 20;
+    const arraySize = size * size;
+    const neighbor = [
+      [-1, -1], [-1, 0], [-1, 1],
+      [0, -1],          [0, 1],
+      [1, -1], [1, 0], [1, 1]
+    ];
+    let curr = new Array(arraySize).fill(0);
+    let next = new Array(arraySize).fill(0);
+    let myInterval;
+
+    function clearWorld() {
+      curr.fill(0);
+      drawWorld();
+    }
+
+    function nextState(id) {
+      const i = Math.floor(id / size);
+      const j = id % size;
+      let count = 0;
+      for (let k = 0; k < 8; k++) {
+        const ii = i + neighbor[k][0];
+        const jj = j + neighbor[k][1];
+        if (ii < 0 || ii >= size || jj < 0 || jj >= size) continue;
+        if (curr[ii * size + jj] === 1) count++;
+      }
+      if (curr[i * size + j] === 1 && (count === 2 || count === 3)) return 1;
+      if (curr[i * size + j] === 0 && count === 3) return 1;
+      return 0;
+    }
+
+    function NextGeneration() {
+      for (let id = 0; id < arraySize; id++) next[id] = nextState(id);
+      for (let id = 0; id < arraySize; id++) curr[id] = next[id];
+      drawWorld();
+    }
+
+    function drawWorld() {
+      for (let id = 0; id < arraySize; id++) {
+        const cell = document.getElementById(String(id));
+        cell.classList.toggle('alive', curr[id] === 1);
+      }
+    }
+
+    function Toggle(cell, id) {
+      curr[id] = curr[id] ? 0 : 1;
+      cell.classList.toggle('alive', curr[id] === 1);
+    }
+
+    const grid = document.getElementById('grid');
+    for (let id = 0; id < arraySize; id++) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.id = id;
+      cell.onclick = () => Toggle(cell, id);
+      grid.appendChild(cell);
+    }
+  </script>
+</body>
+  <footer style="margin-top: 30px; font-size: 0.9em; color: #666;">
+  20243076 허 석
+</footer>
+</html>
